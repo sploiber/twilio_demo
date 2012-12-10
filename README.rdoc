@@ -170,3 +170,5 @@ c. "Generify" the voice message sender in the controller; it should not have
     a hard-coded URL.
 
 d. Test suite
+
+e. Devise authentication
