@@ -10,7 +10,7 @@ class VoiceMessagesController < ApplicationController
     @client.account.calls.create(
        :from => @voice_message.from_number,
        :to => @voice_message.to_number,
-       :url => "http://66.128.53.208:3400/voice_messages/voice_send"
+       :url => "http://localhost:3400/voice_messages/voice_send"
     )
     if @voice_message.save
       flash[:notice] = "Voice Message has been created."
