@@ -6,7 +6,7 @@ class VoiceMessagesController < ApplicationController
   def create
     @voice_message = VoiceMessage.new(params[:voice_message])
     @client = Twilio::REST::Client.new @voice_message.account_sid, @voice_message.auth_token
-    @my_message = @voice_message.body
+    @my_message = "hello"
     @client.account.calls.create(
        :from => @voice_message.from_number,
        :to => @voice_message.to_number,
