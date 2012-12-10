@@ -168,3 +168,5 @@ b. Research into why variables cannot be passed to the XML generated for
 
 c. "Generify" the voice message sender in the controller; it should not have
     a hard-coded URL.
+
+d. Test suite
