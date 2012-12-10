@@ -1,0 +1,27 @@
+<%= form_for(@sms_message) do |f| %>
+<%= f.error_messages %>
+
+<p>
+<%= f.label :account_sid %>
+<%= f.text_field :account_sid, :size => 40  %>
+
+<p>
+<%= f.label :auth_token %>
+<%= f.text_field :auth_token, :size => 40  %>
+
+<p>
+<%= f.label :from_number %>
+<%= f.text_field :from_number, :size => 40  %>
+
+<p>
+<%= f.label :to_number %>
+<%= f.text_field :to_number, :size => 40  %>
+
+<p>
+<%= f.label :body %>
+<%= f.text_field :body, :size => 60  %>
+
+<p>
+<%= f.submit "Send!" %>
+
+<% end %>
