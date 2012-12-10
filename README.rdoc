@@ -1,0 +1,167 @@
+== Twilio_Demo
+
+Twilio Demo is a basic Ruby on Rails application designed to explore the Twilio
+API, for SMS and voice.
+
+== Ruby on Rails versions and software utilized
+
+- Rails 3.2.8
+- MySQL
+
+== How to build "Twilio Demo"
+
+1. Run the command "rails new twilio_demo --skip-unit-test --skip-prototype --skip-bundle -J -T"
+
+   This command will set up a basic application infrastructure.
+
+2. Add 'therubyracer' to the Gemfile. Change 'sqlite3' to 'mysql2' 
+   in the Gemfile. Run 'bundle install'.
+
+3. Copy database.yml from the project's Github repository to 
+   config/database.yml.
+
+4. Run "rake db:create" to generate the databases (development and test) for
+   the app "twilio_demo". (MySQL will need to be set up on your machine)
+
+5. Remove public/index.html. We will be creating our own front page.
+
+6. Run "rails generate controller home index --no-controller-specs" to
+    generate a default front page (home controller).
+
+7. In config/routes.rb, do the following:
+     a) Remove the line "get "home/index""
+     b) Find the line which includes "welcome#index", and below it, add:
+
+  root :to => 'home#index'
+
+8. From Github in app/views/home, copy index.html.erb to app/views/home.
+    This sets up a very simple home page.
+
+9. Add gem 'twilio-ruby' to the Gemfile, and run "bundle install".
+
+10. Run "rails generate model sms_messages account_sid auth_token from_number to_number body"
+
+11. Run "rake db:migrate" to add a class "sms_message" to the database.
+
+12. Rename app/models/sms_messages.rb to app/models/sms_message.rb and
+    change the name to 'SmsMessage'. Add the following to 
+    app/models/sms_message.rb:
+
+  validates_length_of :from_number, :minimum => 12, :maximum => 12
+  validates_length_of :to_number, :minimum => 12, :maximum => 12
+  validates_length_of :body, :minimum => 1, :maximum => 140
+
+13. Create app/views/sms_messages, and from Github in app/views/sms_messages, 
+    copy new.html.erb to app/views/sms_messages.
+    This adds a view for creating a text message.
+
+14. In config/routes.rb, add:
+
+     resources :sms_messages
+
+15. Now, do "rails server -p 3000". This starts the Rails server, so that
+    we can see if the pages are working on the Web site. Control-C it, so
+    that it stops (we will restart it shortly).
+
+16. From Github in app/controllers, copy sms_messages_controller.rb to app/controllers.
+
+17. From Github in app/views/sms_messages, copy _form.html.erb to app/views/sms_messages.
+
+18. In the assets group in the Gemfile, add 'dynamic_form', and do
+    "bundle install".
+
+19. Do "rails server -p 3400" to start the server.
+
+20. Browse to http://localhost:3400, and try the app, to
+    send an SMS. Hopefully, you will receive the text message on your
+    "to_number"'s phone. (SMS-OUT) Note that you will need your Twilio
+    account_sid and auth_token. Also, the phone numbers must begin with
+    "+1"; we will return to this later.
+
+21. Now, on your Twilio account, go to your phone number, and associate it
+    for receiving SMS (SMS Request URL) with the following URL:
+
+     http://localhost:3400/sms_messages/receive.
+
+    Twilio will make a request to this URL if your phone number receives
+    an SMS text message. Set the type to POST for now.
+
+    Set the "SMS Fallback URL" to 
+    http://localhost:3400/sms_messages/bad_receive. 
+
+    The view is app/views/sms_messages/receive.html.erb, and the "bad view"
+    is in app/views/sms_messages/bad_receive.html.erb. Copy these two files
+    from Github app/views/sms_messages.
+
+    The receive view produces XML. (SMS-IN)
+
+22. Remove app/views/layouts/application.html.erb. This file causes HTML to
+    be generated, and Twilio's servers require XML.
+
+23. In config/routes.rb, change
+
+  resources :sms_messages
+
+    to
+
+  resources :sms_messages do
+    post 'receive', :on => :collection
+    post 'bad_receive', :on => :collection
+  end
+
+    Now, test this by sending an SMS message to your phone number. Note that
+    the Rails server still has to be running.
+
+24. Now, we will experiment with sending a voice call (VOICE-OUT).
+    Run "rails generate model voice_messages account_sid auth_token from_number to_number"
+
+25. Run "rake db:migrate" to add a class "sms_message" to the database.
+
+26. Rename app/models/voice_messages.rb to app/models/voice_message.rb and
+    change the name to 'VoiceMessage'. Add the following to 
+    app/models/voice_message.rb:
+
+  validates_length_of :from_number, :minimum => 12, :maximum => 12
+  validates_length_of :to_number, :minimum => 12, :maximum => 12
+
+27. Create app/views/voice_messages, and from Github in 
+    app/views/voice_messages, copy new.html.erb, _form.html.erb, and 
+    voice_send.html.erb to app/views/voice_messages.
+    These files add views for sending voice messages.
+
+28. Add to config/routes.rb:
+
+  resources :voice_messages do
+    post 'voice_send', :on => :collection
+  end
+
+29. Add app/controllers/voice_messages_controller.rb from Github.
+
+30. Now, browse to the home page, and try "New Voice Message".
+    The destination number should receive a call with some simple text
+    read by Twilio's voice generator.
+
+31. Finally, we will receive a voice call (VOICE-IN).
+    On your Twilio account, go to your phone number, and associate it
+    for receiving voice (Voice Request URL) with the following URL:
+
+     http://localhost:3400/sms_messages/voice_in.
+
+    Twilio will make a request to this URL if your phone number receives
+    a voice call. Set the type to GET for now.
+
+32. Add the following to config/routes.rb:
+
+    get 'voice_in', :on => :collection
+
+    in the sms_messages stanza.
+
+33. Place a call, from any phone, to your Twilio number. You should hear
+    a simple message played back, with part of it in Spanish.
+
+== Next Steps
+
+a. Phone number formatting - insisting on the "+1"
+
+b. Research into why variables cannot be passed to the XML generated for
+   the outgoing call.
